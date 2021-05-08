@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { StyleSheet, Image, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native'
-
+import { showSuccess, showError } from '../../commom'
 import { signIn, signUp } from '../../api'
 
 function LoginAndRegister() {
@@ -9,6 +9,7 @@ function LoginAndRegister() {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [validPassword, setValidPassword] = useState('')
 
     const OnPressRegisterInputs = () => {
         setIsRegister(isRegister ? false : true)
@@ -21,7 +22,26 @@ function LoginAndRegister() {
             password
         }
 
-        signIn(body)
+        if (!email || !password) {
+            showError("Status do Login", "Preencha todos os campos!")
+        } else {
+            signIn(body)
+                .then(response => {
+                    showSuccess("Status do Login", "Login realizado com sucesso!")
+                })
+                .catch(error => {
+                    const statusCode = error.response.status
+                    let message = ''
+
+                    if (statusCode === 404) {
+                        message = "Usuário ou senha invalidos"
+                    } else if (statusCode === 500) {
+                        message = "Ocorreu um erro inesperado.\nPor favor, tente novamente mais tarde"
+                    }
+                    
+                    showError("Status do Login", message)
+                })
+        }
     }
 
     const OnPressSignUp = () => {
@@ -34,9 +54,16 @@ function LoginAndRegister() {
             createdAt: new Date()
         }
 
-        signUp(body)
-
-        setIsRegister(isRegister ? false : true)
+        if (!name || !email || !password || !validPassword) {
+            showError("Status do Cadastro", "Preencha todos os campos!")
+        } else if (password === validPassword) {
+            signUp(body)
+                .then(() => showSuccess("Status do Cadastro", "Cadastro realizado com sucesso!"))
+                .catch(() => showError("Status do Cadastro", "Ocorreu um erro inesperado.\nPor favor, tente novamente mais tarde"))
+                .finally(() => setIsRegister(isRegister ? false : true))
+        } else {
+            showError("Status do Cadastro", "As senhas são diferentes!")
+        }
     }
 
     return( 
@@ -74,7 +101,7 @@ function LoginAndRegister() {
                         (
                             <>
                                 <Text style = { styles.textInput }>Confirmar Senha</Text>
-                                <TextInput style = { styles.input } secureTextEntry = { true } />
+                                <TextInput style = { styles.input } secureTextEntry = { true } onChangeText = {text => setValidPassword(text)} />
                             </>
                         )
                         :
@@ -86,18 +113,18 @@ function LoginAndRegister() {
                 </View>
 
                 <TouchableOpacity style = { styles.btnSignIn } onPress = { isRegister ? OnPressSignUp : OnPressSignIn }>
-                    <Text style = { styles.btnTextSignIn }>{ isRegister ? "Cadastrar" : "Entrar"}</Text>
+                    <Text style = { styles.btnTextSignIn }>{ isRegister ? "Cadastrar" : "Entrar" }</Text>
                 </TouchableOpacity>
 
-                {
+                <TouchableOpacity style = { styles.btnSignUp } onPress = { OnPressRegisterInputs }>
+                    <Text style = { styles.btnTextSignUp }>{ isRegister ? "Voltar" : "Não possui cadastro?"}</Text>
+                </TouchableOpacity>
+
+                {/*
                     !isRegister
                     ?
                     (
                         <>
-                            <TouchableOpacity style = { styles.btnSignUp } onPress = { OnPressRegisterInputs }>
-                                <Text style = { styles.btnTextSignUp }>Não possui cadastro?</Text>
-                            </TouchableOpacity>
-
                             <TouchableOpacity style = { styles.btnForgotPassword }>
                                 <Text>Esqueci minha senha</Text>
                             </TouchableOpacity>
@@ -108,7 +135,7 @@ function LoginAndRegister() {
                         <>
                         </>
                     )
-                }
+                */}
             </View>
         </>
     )
@@ -148,8 +175,6 @@ const styles = StyleSheet.create({
     },
     input: {
         fontSize: 16,
-        paddingTop: 8,
-        paddingBottom: 8,
         borderBottomWidth: 2,
         borderBottomColor: '#8a8a8a',
         marginBottom: 17

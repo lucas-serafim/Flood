@@ -1,19 +1,14 @@
-import axios from "axios";
+import axios from 'axios';
+import { Platform } from 'react-native';
 
-const API_URL = 'http://192.168.1.108:8080'
+const API_URL = Platform.OS === 'ios' ? 'http://localhost:8080' : 'http://192.168.1.112:8080'
 
-export async function signIn(body: object) {
-    await axios.post(`${API_URL}/users/login`, body)
-    .then(function (response) {
-        console.log(response.status)
-    })
-    .catch(function (error) {
-        console.log(error)
-    })
+export function signIn(body: object) {
+    return axios.post(`${API_URL}/users/login`, body)
 }
 
-export function signUp(body: object) {
-    axios.post(`${API_URL}/users`, body)
+export async function signUp(body: object) {
+    return axios.post(`${API_URL}/users`, body)
 }
 
 /*export function fetchOrders() {
