@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
 import { StyleSheet, Image, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
 import { showSuccess, showError } from '../../commom'
 import { signIn, signUp } from '../../api'
 
 function LoginAndRegister() {
     const [isRegister, setIsRegister] = useState(false)
-
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [validPassword, setValidPassword] = useState('')
+
+    const navigation = useNavigation()
 
     const OnPressRegisterInputs = () => {
         setIsRegister(isRegister ? false : true)
@@ -28,6 +30,7 @@ function LoginAndRegister() {
             signIn(body)
                 .then(response => {
                     showSuccess("Status do Login", "Login realizado com sucesso!")
+                    navigation.navigate('Notice')
                 })
                 .catch(error => {
                     const statusCode = error.response.status
@@ -58,9 +61,11 @@ function LoginAndRegister() {
             showError("Status do Cadastro", "Preencha todos os campos!")
         } else if (password === validPassword) {
             signUp(body)
-                .then(() => showSuccess("Status do Cadastro", "Cadastro realizado com sucesso!"))
+                .then(() => { 
+                    showSuccess("Status do Cadastro", "Cadastro realizado com sucesso!")
+                    setIsRegister(isRegister ? false : true) 
+                })
                 .catch(() => showError("Status do Cadastro", "Ocorreu um erro inesperado.\nPor favor, tente novamente mais tarde"))
-                .finally(() => setIsRegister(isRegister ? false : true))
         } else {
             showError("Status do Cadastro", "As senhas são diferentes!")
         }
@@ -117,7 +122,7 @@ function LoginAndRegister() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style = { styles.btnSignUp } onPress = { OnPressRegisterInputs }>
-                    <Text style = { styles.btnTextSignUp }>{ isRegister ? "Voltar" : "Não possui cadastro?"}</Text>
+                    <Text style = { styles.btnTextSignUp }>{ isRegister ? "Já é cadastro?" : "Não possui cadastro?"}</Text>
                 </TouchableOpacity>
 
                 {/*

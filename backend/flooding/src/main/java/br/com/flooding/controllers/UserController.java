@@ -55,14 +55,14 @@ public class UserController {
 		// NoSuchAlgorithmException, InvalidKeySpecException
 	}
 	
-	@PostMapping(value = "/login")
+	@PostMapping(value = "/login")	
 	public ResponseEntity<UserDTO> login(@RequestBody UserDTO dto){
 		try {
 			UserDTO user = userService.login(dto);
 			return ResponseEntity.status(200).body(user);
 		} catch(NullPointerException e) {
 			return ResponseEntity.status(404).build();
-		} catch(NoSuchAlgorithmException e) {
+		} catch(NoSuchAlgorithmException e) {	
 			return ResponseEntity.status(500).build();
 		} catch(InvalidKeySpecException e) {
 			return ResponseEntity.status(500).build();
